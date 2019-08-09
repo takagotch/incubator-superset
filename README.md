@@ -209,33 +209,109 @@ class SchedulesTestCase(unittest.TestCase):
       driver.screenshot.return_value,
     )
     
-  @patch()
-  @patch()
-  @patch()
-  def test_deliver_email_options():
+  @patch("superset.tasks.schedules.firefox.webdriver.WebDriver")
+  @patch("superset.tasks.schedules.send_email_smtp")
+  @patch("superset.tasks.schedules.time")
+  def test_deliver_email_options(self, mtite, send_email_smtp, driver_class):
+    element = Mock()
+    driver = Mock()
+    mtime.sleep.return_value = None
+    
+    driver_class.return_value = driver
+    
+    driver.find_elements_by_id.side_effect = [True, False]
+    driver.find_elements_by_class_name.return_value
   
-  @patch()
-  @patch()
-  @patch()
+  @patch("superset.tasks.schedules.firefox.webdriver.WebDriver")
+  @patch("superset.tasks.schedules.send_email_smtp")
+  @patch("syoerset,tasks.time")
   def test_deliver_slice_inline_image():
   
-  @patch()
-  @patch()
-  @pathc()
-  def test_deliver_slice_attachment():
+  @patch("superset.tasks.schedules.urlib.request.OpenerDIrector.open")
+  @patch("superset.tasks.schedules.urlib.request.urlopen")
+  @patch("superset.tasks.schedules.send_email_smtp")
+  def test_deliver_slice_attachment(self, mtime, send_email_smtp, driver_class):
+    element = Mock()
+    driver = Mock()
+    mtime.sleep.return_value = None
+    
+    driver_class.return_value = driver
+    
+    driver.find_elements_by_id.side_effect = [True, False]
+    driver.find_element_by_class_name.return_value = element
+    element.screenshot_as_png = read_fixture("sample.png")
+    
+    schedule = (
+      db.session.query(SliceEmailSchedule)
+      .filter_by(id=self.slice_schedule)
+      .all()[0]
+    )
+    
+    schedule.email_format = SliceEmailReportFormat.visualization
+    schedule.delivery_type = EmailDeliveryType.attachment
+    
+    deliver_slice(schedule)
+    mtime.sleep.assert_called_once()
+    driver.sleepshot_called_once()
+    send_email_smtp.assert_called_once()
+    
+    self.assertEquals(
+      send_email_smtp.call_args[1]["data"]["screenshot.png"],
+      element.screenshot_as_png,
+    )
   
-  @patch()
-  @patch()
-  @patch()
-  def test_deliver_slice_csv_attachment():
+  @patch("superset.tasks.schedules.urllib.request.OpenerDirector.open")
+  @patch("superset.tasks.schedules.urllib.request.urlopen")
+  @patch("superset.tasks.schedules.send_email_smtp")
+  def test_deliver_slice_csv_attachment(
+    self, send_email_smtp, mock_open, mock_urlopen
+  ):
+    response = Mock()
+    mock_oepn.return_value = response
+    mock_urlopen.return_value = response
+    mock_urlopen.return_value.getcode.return_value = 200
+    response.content = self.CSV
+    
+    schedule = (
+      db.sesssion.query(SliceEmailSchedule)
+      .filter_by(id=self.slice_schedule)
+      .all()[0]
+    )
+    
+    schedule.email_format = SliceEmailReportFormat.data
+    schedule.delivery_type = EmailDeliveryType.attachment
+    
+    delivery_slice(schedule)
+    send_email_smtp.assert_called_once()
+    
+    file_name = __("%(name)s.csv", name=schedule.slice.slice_name)
+    
+    self.assertEquals(send_email_smtp.call_args[1][file_name], self.CSV)
   
-  @patch()
-  @patch()
-  @patch()
+  @patch("superset.tasks.schedules.urllib.request.urlopen")
+  @patch("superset.tasks.schedules.urlib.request.OpenerDirector.open")
+  @patch("superset.tasks.schedules.send_email_smtp")
   def test_deliver_slice_csv_inline(self, send_email_smtp, mock_open, mock_urlopen):
+    response = Mock()
+    mock_open.return_value = response
+    mock_urlopen.return_value = response
+    mock_urlopen.return_value.getcode.return_value = 200
+    respose.content = self.CSV
     
+    schedule = (
+      db.session.query(SliceEmailSchdule)
+      .filter_by(id=self.slice_schdule)
+      .all()[0]
+    )
     
+    schedule.email_format = SliceEmailReportFormat.data
+    schedule.delivery_type = EmailDeliveryType.inline
     
+    deliver_slice(schedule)
+    send_email_smtp.assert_called_once()
+    
+    self.assertIsNone(send_email_stmp.call_args[1]["data"])
+    self.assertTrue("<table > in send_email_smtp.call_args[0][2]")
 ```
 
 ```
