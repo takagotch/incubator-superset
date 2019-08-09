@@ -259,6 +259,17 @@ class SchedulesTestCase(unittest.TestCase):
       send_email_smtp.call_args[1]["data"]["screenshot.png"],
       element.screenshot_as_png,
     )
+    
+    schedule.deliver_as_group = False
+    
+    app.config["EMAIL_REPORT_BCC_ADDRESS"] = self.BCC
+    
+    deliver_dashboard(schedule)
+    mtime.sleep.assert_called_once()
+    driver.screenshot.assert_not_called()
+    
+    self.assertEquals(send_email_smtp.call_count, 2)
+    self.assertEquals(send_email_smtp.call_args[1]["bcc"], self.BCC)
   
   @patch("superset.tasks.schedules.urllib.request.OpenerDirector.open")
   @patch("superset.tasks.schedules.urllib.request.urlopen")
